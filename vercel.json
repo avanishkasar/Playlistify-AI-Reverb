@@ -1,0 +1,22 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_PROJECT_ID": "@supabase-project-id",
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "@supabase-publishable-key",
+    "VITE_SUPABASE_URL": "@supabase-url",
+    "VITE_SPOTIFY_CLIENT_ID": "@spotify-client-id",
+    "VITE_SPOTIFY_CLIENT_SECRET": "@spotify-client-secret",
+    "VITE_SPOTIFY_REFRESH_TOKEN": "@spotify-refresh-token",
+    "VITE_BACKEND_URL": "@backend-url"
+  }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spotify API Test</title>
+</head>
+<body>
+    <h1>Spotify API Proxy Test</h1>
+    <button onclick="testToken()">Test Token Request</button>
+    <button onclick="testRecommendations()">Test Recommendations</button>
+    <pre id="output"></pre>
+
+    <script>
+        const clientId = 'e7b084553d51471fbc32cb2e8a90936d';
+        const clientSecret = '5db1a269182b45c5ba59406192bfa704';
+        const refreshToken = 'AQDJ1d_74Td9rg8aiCadUkl6EJm1E9ewEk58ALOzBHRSrbZsOrnDnfr3lCxYkWg33XDjo2Y2HNGbR2p6O0XFseCDrW5KER6A1sOv4rCZYEHZ4NisDsnCYshwcVEmO2ITQDs';
+
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+            console.log(message);
+        }
+
+        async function testToken() {
+            document.getElementById('output').textContent = '';
+            log('🔑 Testing token request...');
+            
+            try {
+                const authHeader = 'Basic ' + btoa(`${clientId}:${clientSecret}`);
+                log('Auth header: ' + authHeader.substring(0, 30) + '...');
+
+                const body = new URLSearchParams({
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken,
+                });
+
+                log('Making request to: /api/spotify-token/api/token');
+                
+                const response = await fetch('/api/spotify-token/api/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': authHeader,
+                    },
+                    body: body,
+                });
+
+                log('Response status: ' + response.status + ' ' + response.statusText);
+                
+                const text = await response.text();
+                log('Response body: ' + text);
+
+                if (response.ok) {
+                    const data = JSON.parse(text);
+                    log('✅ Success! Access token: ' + data.access_token.substring(0, 20) + '...');
+                    window.accessToken = data.access_token;
+                } else {
+                    log('❌ Error!');
+                }
+            } catch (error) {
+                log('❌ Exception: ' + error.message);
+                log('Stack: ' + error.stack);
+            }
+        }
+
+        async function testRecommendations() {
+            if (!window.accessToken) {
+                log('❌ No access token! Run Test Token first.');
+                return;
+            }
+
+            log('\n🎵 Testing recommendations...');
+            
+            try {
+                const params = new URLSearchParams({
+                    seed_genres: 'pop,rock,indie',
+                    limit: '5'
+                });
+
+                log('Making request to: /api/spotify/v1/recommendations?' + params.toString());
+                
+                const response = await fetch('/api/spotify/v1/recommendations?' + params.toString(), {
+                    headers: {
+                        'Authorization': 'Bearer ' + window.accessToken,
+                    },
+                });
+
+                log('Response status: ' + response.status + ' ' + response.statusText);
+                
+                const text = await response.text();
+                log('Response: ' + text.substring(0, 200) + '...');
+
+                if (response.ok) {
+                    const data = JSON.parse(text);
+                    log('✅ Success! Got ' + data.tracks.length + ' tracks');
+                } else {
+                    log('❌ Error!');
+                }
+            } catch (error) {
+                log('❌ Exception: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
